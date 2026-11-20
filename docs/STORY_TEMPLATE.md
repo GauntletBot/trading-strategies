@@ -1,5 +1,16 @@
 # Story: {story-name}
 
+## Docs
+
+| Document | Purpose |
+|---|---|
+| [ARCHITECTURE.md](ARCHITECTURE.md) | Folder hierarchy, file roles, TDD workflow, promotion path, CI checks |
+| [NAMING_CONVENTION.md](NAMING_CONVENTION.md) | Naming rules, valid/invalid examples, and update guidance for all 5 file types |
+| [RUN_TEMPLATE.md](RUN_TEMPLATE.md) | Copy-paste template for a new run file |
+| [STORY_TEMPLATE.md](STORY_TEMPLATE.md) | This file — copy-paste template for a new story file |
+
+---
+
 > A story is a named hypothesis about a strategy's behaviour.
 > It links one or more run documents and declares pass/fail criteria
 > before any run executes — the TDD contract.
