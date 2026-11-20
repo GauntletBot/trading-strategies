@@ -82,7 +82,7 @@ Stage 0's pass gate is still a proposal: enough trades and positive expectancy a
 | Strategy repo, 5 file types, templates, CI checks | **Built** |
 | Example bots: `demo-bot`, `sma-crossover`, `rsi-reversion`, `vwap-scalp` | **Built** (the demo's results are sample values for illustration) |
 | Databricks catalog `gauntlet`, schema `gauntlet_bot_demo` | **Set up** |
-| TradingView harness and trade analyzer (`harness_v1.pine`, `analyze_trades.py`) | **Built** |
+| TradingView harness and trade analyzer (`tools/harness.pine`, `tools/analyze_trades.py`, run as `gat`) | **Built** |
 | Gauntlet core in Python: milestone M0 (interfaces, run config, vault lock) | **Built** |
 | Data ingestion, simulated broker, walk-forward tuner, vault runner, paper runner, scorecard (M1–M6) | **Planned** |
 | Databricks backtest job and MLflow logging | **Documented** in each `bot.md`; the job code is not in this repo |

@@ -19,9 +19,9 @@ You need:
 - **Python 3.11+** with `pip install pandas numpy openpyxl tabulate`.
 - **The two tools**, from [`tools/`](../tools/) in this repo:
   - [`harness.pine`](../tools/harness.pine): the Pine Script strategy harness, with a vault lock, test windows and risk-based sizing.
-  - [`analyze_trades.py`](../tools/analyze_trades.py): grades a TradingView trade list and logs every trial. Copy it into your work folder.
+  - [`analyze_trades.py`](../tools/analyze_trades.py): grades a TradingView trade list and logs every trial. Set it up once as the `gat` terminal command: see [Install as a terminal command on a Mac](../tools/analyze_trades.md#install-as-a-terminal-command-on-a-mac).
 
-  The plain file names are always the latest version; older ones are in `tools/archive/`.
+  The plain file names are always the latest version; older ones are in `tools/archive/`. Without `gat`, run `python path/to/tools/analyze_trades.py` with the same arguments.
 - **Your split dates:** development end and vault start for your symbol. Everything on or after development end is off-limits during Stages 0 and 1.
 
 **Write one sentence first.** Say why the edge should exist and who is on the other side of the trade. If you can't, any result you find is probably noise.
@@ -50,7 +50,7 @@ You need:
 3. Grade it and start the experiment log:
 
    ```bash
-   python analyze_trades.py stage0.csv --log experiments.csv --window IS --label "benchmark, untuned" --out stage0-report.md
+   gat stage0.csv --log experiments.csv --window IS --label "benchmark, untuned" --out stage0-report.md
    ```
 
    This is **trial #1**. Every later run adds to the count.
@@ -73,7 +73,7 @@ You need:
 - **Log every run**, failures included:
 
   ```bash
-  python analyze_trades.py is-don25.csv --log experiments.csv --window IS --label "don=25 htf=D/50 stop=2ATR"
+  gat is-don25.csv --log experiments.csv --window IS --label "don=25 htf=D/50 stop=2ATR"
   ```
 
   The trial count drives the Deflated Sharpe hurdle. Skipped logs make a lucky result look real.
@@ -106,7 +106,7 @@ Judge the **combined** test results, not the best fold.
 When in-sample passes, switch **Window = Out-of-sample** and change **nothing else**:
 
 ```bash
-python analyze_trades.py oos.csv --compare is.csv --log experiments.csv --window OOS --out oos-report.md
+gat oos.csv --compare is.csv --log experiments.csv --window OOS --out oos-report.md
 ```
 
 If you go back and tweak anything after seeing this result, the out-of-sample period is now in-sample. Say so in the log label, and don't count it as an out-of-sample pass.

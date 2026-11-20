@@ -60,14 +60,16 @@ If you can't write this sentence, any result you find is probably noise.
 
 Stage 1 is a cheap filter, not proof.
 
-1. Paste the Pine harness (`harness_v1.pine`) into TradingView's Pine Editor and add it to a chart.
+1. Paste the Pine harness ([`tools/harness.pine`](../../tools/harness.pine)) into TradingView's Pine Editor and add it to a chart.
 2. Set **realistic commission and slippage** in `strategy()`. Optimistic costs are the most common way a backtest lies.
 3. Set the end date to the **vault boundary**. The vault must stay invisible in Stage 1 too.
 4. Change one thing at a time. After each run, export the trade list (Strategy Tester → List of Trades → Download) and run:
 
    ```bash
-   python analyze_trades.py is.csv --log experiments.csv --window IS --label "fast=10 slow=30"
+   gat is.csv --log experiments.csv --window IS --label "fast=10 slow=30"
    ```
+
+   `gat` is the analyzer as a terminal command; set it up once with [these steps](../../tools/analyze_trades.md#install-as-a-terminal-command-on-a-mac).
 
 5. Move on only when you have: the hypothesis, at least 100 trades, a profit-factor 90% confidence interval whose lower bound is above 1, and a **plateau** — neighbouring settings also work, not just one sharp best value.
 

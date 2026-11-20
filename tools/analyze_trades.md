@@ -12,16 +12,20 @@ It only reads, calculates and reports. It never changes your trade file or place
 
 ## Quick usage
 
+Once you've set up the `gat` command ([below](#install-as-a-terminal-command-on-a-mac)), run it from the folder that holds your exports:
+
 ```bash
 # Grade one run and log it as an in-sample trial
-python analyze_trades.py is.csv --log experiments.csv --window IS --label "don=20 htf=D/50 stop=2ATR"
+gat is.csv --log experiments.csv --window IS --label "don=20 htf=D/50 stop=2ATR"
 
 # One-shot out-of-sample check against the in-sample result (doesn't add a trial)
-python analyze_trades.py oos.csv --compare is.csv --log experiments.csv --window OOS --out oos-report.md
+gat oos.csv --compare is.csv --log experiments.csv --window OOS --out oos-report.md
 
 # Just look at a file, no log
-python analyze_trades.py trades.csv --capital 10000
+gat trades.csv --capital 10000
 ```
+
+Without `gat`, the same arguments work with `python path/to/tools/analyze_trades.py`.
 
 ---
 
@@ -117,6 +121,81 @@ To remove the alias, delete the `alias gat=…` line from `~/.zshrc` and open a 
 | `permission denied` | Run `chmod +x ~/.local/bin/analyze-trades` |
 | `No such file or directory` pointing at `analyze_trades.py` | The repo path in the launcher is wrong; edit `~/.local/bin/analyze-trades` |
 | `ModuleNotFoundError: pandas` | Re-run step 3's `pip install` |
+
+---
+
+## Using `gat` from the command line
+
+### The shape of every command
+
+```
+gat <trade-list.csv> [options]
+```
+
+The trade list always comes first; options can go in any order after it. Run `gat --help` for the full option list.
+
+### A typical session
+
+Keep one folder per idea, holding its exports and its experiment log:
+
+```bash
+cd ~/gauntlet/donchian-spy
+
+# Stage 0: the untuned benchmark, trial #1
+gat stage0.csv --log experiments.csv --window IS --label "benchmark, untuned" --out stage0-report.md
+
+# Stage 1: one change at a time, every run logged
+gat is-don15.csv --log experiments.csv --window IS --label "don=15"
+gat is-don20.csv --log experiments.csv --window IS --label "don=20"
+gat is-don25.csv --log experiments.csv --window IS --label "don=25"
+
+# Stage 1: the one-shot out-of-sample check
+gat oos.csv --compare is-don20.csv --log experiments.csv --window OOS --out oos-report.md
+```
+
+### Recipes
+
+| Task | Command |
+|---|---|
+| See all options | `gat --help` |
+| Grade and log an in-sample run | `gat is.csv --log experiments.csv --window IS --label "…"` |
+| Grade a walk-forward test fold | `gat wf3.csv --log experiments.csv --window WF-3 --label "fold 3"` |
+| Out-of-sample check | `gat oos.csv --compare is.csv --log experiments.csv --window OOS` |
+| Save the report as markdown | add `--out report.md` |
+| Use your own drawdown limit | add `--dd-limit 20` |
+| Match a different starting capital | add `--capital 25000` |
+| Faster rough check | add `--iters 1000` |
+| Grade an Excel export | `gat trades.xlsx …` |
+
+### Grade several exports at once
+
+Each file is still logged as its own trial:
+
+```bash
+for f in is-don*.csv; do
+  gat "$f" --log experiments.csv --window IS --label "${f%.csv}" --out "${f%.csv}-report.md"
+done
+```
+
+### Read the results
+
+```bash
+# Page through a long report
+gat is.csv | less
+
+# Show only the verdict
+gat is.csv | sed -n '/## Verdict checklist/,$p'
+
+# View the experiment log as a table
+column -s, -t < experiments.csv | less -S
+```
+
+### Things to remember
+
+- **Always pass `--log`** for real runs. A run that isn't logged doesn't count toward the trial count, which makes later results look more significant than they are.
+- **Use `--window OOS`** for out-of-sample checks so they don't add a trial.
+- **Quote labels with spaces**, for example `--label "don=20 htf=D/50"`.
+- **Same inputs, same answer.** The random seed is fixed (`--seed 7`), so rerunning a file reproduces the report exactly.
 
 ---
 
