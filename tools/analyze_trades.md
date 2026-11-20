@@ -25,6 +25,79 @@ python analyze_trades.py trades.csv --capital 10000
 
 ---
 
+## Install as a terminal command on a Mac
+
+These steps let you type `analyze-trades` from any folder instead of `python path/to/analyze_trades.py`. The command runs the script straight from your clone of this repo, so `git pull` keeps it on the latest version.
+
+**1. Check Python.** You need Python 3.11 or newer:
+
+```bash
+python3 --version
+```
+
+If it's missing or older, install it with [Homebrew](https://brew.sh): `brew install python`.
+
+**2. Clone the repo** (skip if you already have it), and note where it lives:
+
+```bash
+git clone https://github.com/GauntletBot/trading-strategies.git ~/code/trading-strategies
+```
+
+**3. Create a private Python environment** for the script's libraries, so they don't clash with anything else on your Mac:
+
+```bash
+python3 -m venv ~/.venvs/gauntlet
+~/.venvs/gauntlet/bin/pip install pandas numpy openpyxl tabulate
+```
+
+**4. Create the command.** This writes a tiny launcher that runs the repo's script with that environment:
+
+```bash
+mkdir -p ~/.local/bin
+cat > ~/.local/bin/analyze-trades <<'EOF'
+#!/bin/zsh
+exec "$HOME/.venvs/gauntlet/bin/python" "$HOME/code/trading-strategies/tools/analyze_trades.py" "$@"
+EOF
+chmod +x ~/.local/bin/analyze-trades
+```
+
+If you cloned the repo somewhere other than `~/code/trading-strategies`, change that path in the launcher.
+
+**5. Put the command on your PATH** (zsh is the default shell on macOS):
+
+```bash
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.zshrc
+source ~/.zshrc
+```
+
+**6. Check it works:**
+
+```bash
+analyze-trades --help
+```
+
+You should see the usage text. From now on, run it from any folder:
+
+```bash
+cd ~/gauntlet/my-bot
+analyze-trades is.csv --log experiments.csv --window IS --label "don=20 htf=D/50"
+```
+
+**Updating:** `git -C ~/code/trading-strategies pull`. The command picks up the new version automatically.
+
+**Removing:** `rm ~/.local/bin/analyze-trades` and `rm -rf ~/.venvs/gauntlet`.
+
+**Troubleshooting**
+
+| Message | Fix |
+|---|---|
+| `command not found: analyze-trades` | Open a new terminal window, or run `source ~/.zshrc` |
+| `permission denied` | Run `chmod +x ~/.local/bin/analyze-trades` |
+| `No such file or directory` pointing at `analyze_trades.py` | The repo path in the launcher is wrong; edit `~/.local/bin/analyze-trades` |
+| `ModuleNotFoundError: pandas` | Re-run step 3's `pip install` |
+
+---
+
 ## Inputs
 
 ### Required: a trade list
