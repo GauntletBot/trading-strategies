@@ -1,0 +1,22 @@
+spec_id:     sma-crossover-spy-1min-2023
+description: SPY 1-minute bars for 2023 — baseline dataset for SMA crossover development and backtesting
+version:     "1.0.0"
+created:     "2026-11-20"
+author:      alok-m
+bot:         sma-crossover
+
+symbols:
+  - SPY
+
+start:       "2023-01-03"
+end:         "2023-12-29"
+frequency:   1Min
+source:      alpaca
+feed:        sip
+adjust:      true
+data_type:   bars
+
+min_bars_per_day:  300
+max_gap_minutes:   5
+drop_extended:     true
+fill_gaps:         false

@@ -1,0 +1,25 @@
+spec_id:     vwap-scalp-spy-1min-2023
+description: SPY 1-minute bars for 2023 — VWAP scalp development dataset; 1-minute chosen as minimum granularity for VWAP bounce detection without tick data storage overhead
+version:     "1.0.0"
+created:     "2026-11-20"
+author:      quant-dev
+bot:         vwap-scalp
+
+symbols:
+  - SPY
+
+start:       "2023-01-03"
+end:         "2023-12-29"
+frequency:   1Min
+source:      alpaca
+feed:        sip
+adjust:      true
+data_type:   bars
+
+min_bars_per_day:  300
+max_gap_minutes:   2             # Tighter than default — gaps break VWAP calculation
+drop_extended:     true
+fill_gaps:         false
+
+# Note: for realistic execution simulation, upgrade to tick data
+# See: vwap-scalp-tick-dataspec.yaml (planned)

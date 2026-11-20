@@ -1,0 +1,22 @@
+spec_id:     rsi-reversion-qqq-1min-2023
+description: QQQ 1-minute bars for 2023 — dataset for RSI mean reversion development; Nasdaq 100 chosen for higher intraday volatility relative to SPY
+version:     "1.0.0"
+created:     "2026-11-20"
+author:      trader-jane
+bot:         rsi-reversion
+
+symbols:
+  - QQQ
+
+start:       "2023-01-03"
+end:         "2023-12-29"
+frequency:   1Min
+source:      alpaca
+feed:        sip
+adjust:      true
+data_type:   bars
+
+min_bars_per_day:  300
+max_gap_minutes:   5
+drop_extended:     true
+fill_gaps:         false
