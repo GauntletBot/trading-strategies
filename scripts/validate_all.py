@@ -11,6 +11,7 @@ import os
 from validate_strategy import validate_strategy
 from validate_dataspec import validate_dataspec
 from validate_bot import validate_bot
+from validate_run import validate_run
 from validate_folder import validate_folder_completeness
 
 
@@ -84,6 +85,20 @@ def main():
                 print(f"        {e}")
         else:
             print(f"  PASS  bot.md")
+
+        # 5. Validate any run files present in this folder
+        import glob
+        run_files = glob.glob(f"{folder}/{bot_name}-run (*).md")
+        for run_file in sorted(run_files):
+            run_errors = validate_run(run_file, bot_name)
+            label = os.path.basename(run_file)
+            if run_errors:
+                errors.extend(run_errors)
+                print(f"  FAIL  {label}")
+                for e in run_errors:
+                    print(f"        {e}")
+            else:
+                print(f"  PASS  {label}")
 
     print(f"\n{'='*60}")
     if errors:

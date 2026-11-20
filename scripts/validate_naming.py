@@ -92,8 +92,16 @@ def walk_env(root: str) -> list[str]:
             if strategy_files:
                 expected.add(os.path.basename(strategy_files[0]))
 
+            run_re   = re.compile(rf"^{re.escape(bot_name)}-run \(\d{{4}}-\d{{2}}-\d{{2}}-\d{{3}}\)\.md$")
+            story_re = re.compile(rf"^{re.escape(bot_name)}-story-.+\.md$")
+
             for fname in filenames:
-                if fname not in expected and not fname.startswith("."):
+                if (
+                    fname not in expected
+                    and not fname.startswith(".")
+                    and not run_re.match(fname)
+                    and not story_re.match(fname)
+                ):
                     errors.append(
                         f"[{rel}] Unexpected file '{fname}' in bot folder '{bot_name}'"
                     )

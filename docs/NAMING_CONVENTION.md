@@ -10,6 +10,8 @@
 | Strategy file | `{bot-name}-strategy (YYYY-MM-DD).md` | `sma-crossover-strategy (2026-11-20).md` |
 | DataSpec file | `{bot-name}-dataspec.yaml` | `sma-crossover-dataspec.yaml` |
 | Bot file | `{bot-name}-bot.md` | `sma-crossover-bot.md` |
+| Run file | `{bot-name}-run (YYYY-MM-DD-NNN).md` | `sma-crossover-run (2026-11-20-001).md` |
+| Story file | `{bot-name}-story-{story-name}.md` | `sma-crossover-story-baseline-2023.md` |
 
 ---
 
@@ -59,6 +61,29 @@
 ```
 - Bot Operations Document — runtime config, monitoring, incident log
 - No date in the filename — updated in-place, git history tracks changes
+
+### Run File
+```
+{bot-name}-run (YYYY-MM-DD-NNN).md
+```
+- Records one backtest execution: inputs, expected results (written before running), and actual results (filled after)
+- `NNN` is a zero-padded sequence number for multiple runs on the same day: `001`, `002`, etc.
+- **Write Expected Results before executing** — this is the TDD contract
+- Status field: `expected` → `completed` or `failed`
+
+**Valid:** `sma-crossover-run (2026-11-20-001).md`  
+**Invalid:** `sma-crossover-run-2026-11-20.md` (wrong format — parens and sequence required)
+
+### Story File
+```
+{bot-name}-story-{story-name}.md
+```
+- A named hypothesis linking one or more run documents
+- Declares acceptance criteria before any run executes
+- Status: `open` → `passing` or `failing`
+- Story name is lowercase-hyphen: `baseline-2023`, `high-vol-regime`, `param-sweep-fast-window`
+
+**Valid:** `sma-crossover-story-baseline-2023.md`
 
 ---
 

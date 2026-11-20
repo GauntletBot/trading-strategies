@@ -60,6 +60,11 @@ def validate_folder_completeness(folder: str) -> list[str]:
     if strategy_files:
         expected.add(os.path.basename(strategy_files[0]))
 
+    # Run files: {bot-name}-run (YYYY-MM-DD-NNN).md
+    run_re    = re.compile(rf"^{re.escape(bot_name)}-run \(\d{{4}}-\d{{2}}-\d{{2}}-\d{{3}}\)\.md$")
+    # Story files: {bot-name}-story-{story-name}.md
+    story_re  = re.compile(rf"^{re.escape(bot_name)}-story-.+\.md$")
+
     for entry in all_entries:
         full_path = os.path.join(folder, entry)
         if os.path.isdir(full_path):
@@ -67,10 +72,17 @@ def validate_folder_completeness(folder: str) -> list[str]:
                 f"[{folder}] Bot folders must be leaf nodes — "
                 f"unexpected sub-folder: '{entry}'"
             )
-        elif entry not in expected and not entry.startswith("."):
+        elif (
+            entry not in expected
+            and not entry.startswith(".")
+            and not run_re.match(entry)
+            and not story_re.match(entry)
+        ):
             errors.append(
                 f"[{folder}] Unexpected file '{entry}' — "
-                f"bot folders should only contain the three required files"
+                f"bot folders may only contain: the three required files, "
+                f"run files ({bot_name}-run (YYYY-MM-DD-NNN).md), "
+                f"and story files ({bot_name}-story-{{name}}.md)"
             )
 
     return errors
