@@ -4,6 +4,10 @@ This repository is the source of truth for all trading bot strategies and histor
 
 ## Quick Start
 
+**First idea?** Follow **[docs/QUICKSTART.md](docs/QUICKSTART.md)**: test it in TradingView (Stage 0 benchmark, then Stage 1 Discover) and hand off a candidate, in an afternoon.
+
+Then, for each bot:
+
 1. Create a folder under `dev/` with your GitHub username
 2. Add a subfolder for each strategy category you work on
 3. For each bot, create a folder with the three required files
@@ -68,6 +72,7 @@ New here? Start with the **[Gauntlet — Introduction for Beginners slide deck](
 | Document | Purpose |
 |---|---|
 | [Intro slide deck (Google Drive)](https://drive.google.com/drive/folders/1LKs8QqLk9bggxP_k-VIWt-hlOmJST0SS) | The same intro as slides. The newest copy is named `Gauntlet — Introduction for Beginners last (YYYY-MM-DD)`; older copies are numbered 0, 1, 2… |
+| [QUICKSTART.md](docs/QUICKSTART.md) | From idea to candidate in TradingView: Stage 0 benchmark, Stage 1 Discover, hand-off to Stage 2 |
 | [Intro for beginners](docs/intro/README.md) | Start here: overview, architecture and data flows, getting started step by step, glossary |
 | [ARCHITECTURE.md](docs/ARCHITECTURE.md) | Folder hierarchy, file roles, TDD workflow, promotion path, CI checks |
 | [NAMING_CONVENTION.md](docs/NAMING_CONVENTION.md) | Naming rules, valid/invalid examples, and update guidance for all 5 file types |
@@ -82,6 +87,7 @@ New here? Start with the **[Gauntlet — Introduction for Beginners slide deck](
 trading-strategies/
 ├── README.md
 ├── docs/
+│   ├── QUICKSTART.md               ← idea to candidate in TradingView
 │   ├── ARCHITECTURE.md             ← folder hierarchy, file roles, TDD workflow
 │   ├── NAMING_CONVENTION.md        ← naming rules for all 5 file types
 │   ├── RUN_TEMPLATE.md             ← template for run files
