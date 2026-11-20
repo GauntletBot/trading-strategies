@@ -12,6 +12,8 @@ This repository is the source of truth for all trading bot strategies and histor
 
 See the [Docs](#docs) section below for links to all reference documents.
 
+New here? Start with the **[Gauntlet — Introduction for Beginners slide deck](https://drive.google.com/drive/folders/1LKs8QqLk9bggxP_k-VIWt-hlOmJST0SS)** in the shared Gauntlet folder on Google Drive (anyone with the link can view).
+
 ---
 
 ## Environments
@@ -65,6 +67,7 @@ See the [Docs](#docs) section below for links to all reference documents.
 
 | Document | Purpose |
 |---|---|
+| [Intro slide deck (Google Drive)](https://drive.google.com/drive/folders/1LKs8QqLk9bggxP_k-VIWt-hlOmJST0SS) | The same intro as slides. The newest copy is named `Gauntlet — Introduction for Beginners last (YYYY-MM-DD)`; older copies are numbered 0, 1, 2… |
 | [Intro for beginners](docs/intro/README.md) | Start here: overview, architecture and data flows, getting started step by step, glossary |
 | [ARCHITECTURE.md](docs/ARCHITECTURE.md) | Folder hierarchy, file roles, TDD workflow, promotion path, CI checks |
 | [NAMING_CONVENTION.md](docs/NAMING_CONVENTION.md) | Naming rules, valid/invalid examples, and update guidance for all 5 file types |
