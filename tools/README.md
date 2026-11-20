@@ -5,7 +5,7 @@ Shared tools for Stages 0 and 1 of the gauntlet. See [docs/QUICKSTART.md](../doc
 | File | What it is | Where it runs |
 |---|---|---|
 | [`harness.pine`](harness.pine) | TradingView strategy harness (currently v2): vault lock, test windows, risk-based sizing, run card | TradingView: paste into the Pine Editor, save as a private script |
-| [`analyze_trades.py`](analyze_trades.py) | Grades a TradingView trade list: bootstrap, Monte Carlo drawdown, Deflated Sharpe, gate checklist, experiment log | Your laptop: `pip install pandas numpy openpyxl tabulate` |
+| [`analyze_trades.py`](analyze_trades.py) | Grades a TradingView trade list: bootstrap, Monte Carlo drawdown, Deflated Sharpe, gate checklist, experiment log. Full guide: [analyze_trades.md](analyze_trades.md) | Your laptop: `pip install pandas numpy openpyxl tabulate` |
 
 ## Versioning
 
