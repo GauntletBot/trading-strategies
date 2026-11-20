@@ -4,4 +4,32 @@
 # RUN_TEMPLATE.md      — copy-paste template for run files:           /docs/RUN_TEMPLATE.md
 # STORY_TEMPLATE.md    — copy-paste template for story files:         /docs/STORY_TEMPLATE.md
 
--ToDo
+spec_id:     demo-bot-spy-1min-2023
+description: SPY 1-minute bars for calendar year 2023 — canonical demo dataset for the GauntletBot platform baseline backtest
+version:     "1.0.0"
+created:     "2026-11-20"
+author:      demo
+bot:         demo-bot
+
+symbols:
+  - SPY
+
+start:       "2023-01-03"
+end:         "2023-12-29"
+frequency:   1Min
+source:      alpaca
+feed:        sip
+adjust:      true
+data_type:   bars
+
+min_bars_per_day:  300
+max_gap_minutes:   5
+drop_extended:     true
+fill_gaps:         false
+
+# Notes:
+# - feed: sip is the consolidated tape (all US exchanges). Requires paid Alpaca subscription.
+# - adjust: true applies split/dividend adjustments to price data.
+# - drop_extended: true excludes pre-market and after-hours bars (session only: 09:30–16:00 ET).
+# - min_bars_per_day: 300 flags any day with fewer bars for review (390 bars in a full session).
+# - max_gap_minutes: 5 flags any intraday gap longer than 5 minutes for review.
