@@ -1,0 +1,240 @@
+//@version=6
+// ============================================================================
+//  Strategy Harness v2  —  Stage 1 (Discover) of the gauntlet pipeline
+//  File: tools/harness.pine is always the latest version.
+//        Earlier versions are kept in tools/archive/harness_vN.pine.
+//
+//  Changes from v1
+//   • VAULT LOCK: the script never trades on or after "Development end".
+//     Copy both dates from `gauntlet splits status`. The embargo and vault
+//     are shaded red so you can see what is off-limits.
+//   • "Out-of-sample end" defaults to Development end; any later value is clamped.
+//   • Run card shows the lock dates, so every screenshot proves the vault was untouched.
+//
+//  Everything else is v1: swappable signal module, regime filter, ATR risk sizing,
+//  IS/OOS/walk-forward windows (all inside the development period), webhook JSON.
+//
+//  IMPORTANT: commission / slippage are set in strategy() below. Change them to
+//  match YOUR broker/exchange before trusting any number.
+// ============================================================================
+strategy("Harness v2 (gauntlet)", overlay = true,
+     initial_capital         = 10000,
+     currency                = currency.USD,
+     default_qty_type        = strategy.fixed,
+     default_qty_value       = 1,
+     commission_type         = strategy.commission.percent,
+     commission_value        = 0.05,     // 0.05% per side — edit for your venue
+     slippage                = 2,        // ticks per fill — edit for your market
+     pyramiding              = 0,
+     process_orders_on_close = false,    // signals on close, fills at NEXT bar open
+     calc_on_every_tick      = false,    // decide on confirmed bars only
+     use_bar_magnifier       = true,     // intrabar fills (Premium+; ignored otherwise)
+     margin_long             = 100,
+     margin_short            = 100,
+     max_bars_back           = 5000)
+
+// ───────────────────────────── 0. VAULT LOCK ───────────────────────────────
+grpV       = "0 · Vault lock (from gauntlet splits status)"
+devEnd     = input.time(timestamp("18 May 2024 00:00 +0000"), "Development end (no trades on/after)", group = grpV)
+vaultStart = input.time(timestamp("15 Sep 2024 00:00 +0000"), "Vault start (display only)",           group = grpV)
+
+// ───────────────────────────── 1. TEST WINDOW ──────────────────────────────
+grpW       = "1 · Test window (inside development period)"
+windowMode = input.string("In-sample", "Window",
+     options = ["All", "In-sample", "Out-of-sample", "WF train (folds before k)", "WF test (fold k)"], group = grpW)
+isStart    = input.time(timestamp("01 Jan 2016 00:00 +0000"), "Data start",              group = grpW)
+isEnd      = input.time(timestamp("01 Jan 2022 00:00 +0000"), "In-sample end / OOS start", group = grpW)
+oosEndIn   = input.time(timestamp("18 May 2024 00:00 +0000"), "Out-of-sample end (clamped to Development end)", group = grpW)
+nFolds     = input.int(6, "Walk-forward folds (N)", minval = 2, maxval = 20,              group = grpW)
+foldK      = input.int(2, "Walk-forward fold k",     minval = 1, maxval = 20,              group = grpW,
+     tooltip = "Folds split [Data start, OOS end] into N equal slices. 'WF train' trades slices 1..k-1, 'WF test' trades slice k only.")
+
+int   oosEnd    = math.min(oosEndIn, devEnd)
+float span      = float(oosEnd - isStart) / nFolds
+int   foldStart = isStart + int(math.round(span * (foldK - 1)))
+int   foldEnd   = isStart + int(math.round(span * foldK))
+
+bool inWindow = switch windowMode
+    "All"                       => time >= isStart   and time < oosEnd
+    "In-sample"                 => time >= isStart   and time < isEnd
+    "Out-of-sample"             => time >= isEnd     and time < oosEnd
+    "WF train (folds before k)" => time >= isStart   and time < foldStart
+    "WF test (fold k)"          => time >= foldStart and time < foldEnd
+    => false
+// Hard lock: nothing at or after the development end, whatever the window says
+inWindow := inWindow and time < devEnd
+
+// ───────────────────────────── 2. SIGNAL MODULE ────────────────────────────
+// Add new ideas here as another option. Keep the module returning longRaw / shortRaw.
+grpS    = "2 · Signal"
+sigMode = input.string("Donchian breakout", "Signal",
+     options = ["Donchian breakout", "EMA cross", "RSI pullback"], group = grpS)
+donLen   = input.int(20,  "Donchian length",   minval = 2, group = grpS)
+fastLen  = input.int(20,  "EMA fast",          minval = 1, group = grpS)
+slowLen  = input.int(50,  "EMA slow",          minval = 2, group = grpS)
+rsiLen   = input.int(14,  "RSI length",        minval = 2, group = grpS)
+rsiLo    = input.int(30,  "RSI oversold",                  group = grpS)
+rsiHi    = input.int(70,  "RSI overbought",                group = grpS)
+trendLen = input.int(200, "RSI trend SMA",     minval = 2, group = grpS)
+
+// Compute every series on every bar (avoids local-scope ta.* inconsistencies)
+float upper  = ta.highest(high, donLen)[1]
+float lower  = ta.lowest(low, donLen)[1]
+float emaF   = ta.ema(close, fastLen)
+float emaS   = ta.ema(close, slowLen)
+float rsi    = ta.rsi(close, rsiLen)
+float trendS = ta.sma(close, trendLen)
+bool  emaUp  = ta.crossover(emaF, emaS)
+bool  emaDn  = ta.crossunder(emaF, emaS)
+bool  rsiDn  = ta.crossunder(rsi, rsiLo)
+bool  rsiUp  = ta.crossover(rsi, rsiHi)
+
+bool longRaw = switch sigMode
+    "Donchian breakout" => close > upper
+    "EMA cross"         => emaUp
+    "RSI pullback"      => close > trendS and rsiDn
+    => false
+
+bool shortRaw = switch sigMode
+    "Donchian breakout" => close < lower
+    "EMA cross"         => emaDn
+    "RSI pullback"      => close < trendS and rsiUp
+    => false
+
+// ───────────────────────────── 3. REGIME FILTER ────────────────────────────
+// Non-repainting higher-timeframe read: previous HTF bar + lookahead_on.
+grpF   = "3 · Regime filter"
+useHtf = input.bool(true, "Use higher-timeframe trend filter", group = grpF)
+htfTf  = input.timeframe("D", "HTF timeframe",                 group = grpF)
+htfLen = input.int(50, "HTF EMA length", minval = 2,           group = grpF)
+[htfC, htfE] = request.security(syminfo.tickerid, htfTf, [close[1], ta.ema(close, htfLen)[1]], lookahead = barmerge.lookahead_on)
+bool htfUp = not useHtf or htfC > htfE
+bool htfDn = not useHtf or htfC < htfE
+
+// ───────────────────────────── 4. RISK & EXITS ─────────────────────────────
+grpR       = "4 · Risk & exits"
+direction  = input.string("Both", "Direction", options = ["Long only", "Short only", "Both"], group = grpR)
+riskPct    = input.float(1.0,  "Risk per trade (% equity)", minval = 0.05, step = 0.05, group = grpR)
+maxLev     = input.float(1.0,  "Max notional / equity",     minval = 0.1,  step = 0.1,  group = grpR)
+qtyStep    = input.float(1.0,  "Quantity step (1 = whole shares, 0.001 crypto)", minval = 0.000001, group = grpR)
+atrLen     = input.int(14,     "ATR length",                minval = 1, group = grpR)
+stopMult   = input.float(2.0,  "Stop = ATR ×",              minval = 0.1, step = 0.1, group = grpR)
+useTp      = input.bool(true,  "Use take-profit",           group = grpR)
+tpR        = input.float(2.0,  "Take-profit (R multiple)",  minval = 0.1, step = 0.1, group = grpR)
+maxBars    = input.int(0,      "Time stop (bars, 0 = off)", minval = 0, group = grpR)
+exitOnOpp  = input.bool(true,  "Exit on opposite signal",   group = grpR)
+maxDdPct   = input.float(25,   "Kill switch: max drawdown %", minval = 1, maxval = 100, group = grpR)
+
+strategy.risk.max_drawdown(maxDdPct, strategy.percent_of_equity)
+
+bool allowLong  = direction != "Short only"
+bool allowShort = direction != "Long only"
+float atr       = ta.atr(atrLen)
+float stopDist  = atr * stopMult
+
+calcQty(float sd) =>
+    float riskCash = strategy.equity * riskPct / 100.0
+    float q        = riskCash / (sd * syminfo.pointvalue)
+    float qMax     = strategy.equity * maxLev / (close * syminfo.pointvalue)
+    math.max(math.floor(math.min(q, qMax) / qtyStep) * qtyStep, 0.0)
+
+// ───────────────────────────── 5. ALERT PAYLOAD ────────────────────────────
+// In the alert dialog, set Message to:  {{strategy.order.alert_message}}
+grpA    = "5 · Alerts"
+botId   = input.string("harness_v2", "Bot id in payload", group = grpA)
+num(float x) =>
+    na(x) ? "null" : str.tostring(x)
+msg(string action, float q, float sl, float tp) =>
+    '{"bot":"' + botId + '","action":"' + action + '","ticker":"' + syminfo.ticker +
+     '","qty":' + num(q) + ',"price":' + num(close) +
+     ',"sl":' + num(sl) + ',"tp":' + num(tp) + '}'
+
+// ───────────────────────────── 6. EXECUTION ────────────────────────────────
+var float tradeStop = na
+
+bool goLong  = inWindow and allowLong  and longRaw  and htfUp and strategy.position_size <= 0 and not na(stopDist)
+bool goShort = inWindow and allowShort and shortRaw and htfDn and strategy.position_size >= 0 and not na(stopDist)
+
+if goLong
+    float q = calcQty(stopDist)
+    if q > 0
+        tradeStop := stopDist
+        float sl = close - stopDist
+        float tp = useTp ? close + stopDist * tpR : na
+        strategy.entry("L", strategy.long, qty = q, alert_message = msg("buy", q, sl, tp))
+        // exit attached before fill so the stop is live on the fill bar
+        strategy.exit("L-x", "L", stop = sl, limit = tp, alert_message = msg("exit_long", q, sl, tp))
+
+if goShort
+    float q = calcQty(stopDist)
+    if q > 0
+        tradeStop := stopDist
+        float sl = close + stopDist
+        float tp = useTp ? close - stopDist * tpR : na
+        strategy.entry("S", strategy.short, qty = q, alert_message = msg("sell", q, sl, tp))
+        strategy.exit("S-x", "S", stop = sl, limit = tp, alert_message = msg("exit_short", q, sl, tp))
+
+// Re-anchor stop/target to the actual fill price once in position
+if strategy.position_size > 0
+    float ep = strategy.position_avg_price
+    strategy.exit("L-x", "L", stop = ep - tradeStop, limit = useTp ? ep + tradeStop * tpR : na,
+         alert_message = msg("exit_long", math.abs(strategy.position_size), ep - tradeStop, na))
+if strategy.position_size < 0
+    float ep = strategy.position_avg_price
+    strategy.exit("S-x", "S", stop = ep + tradeStop, limit = useTp ? ep - tradeStop * tpR : na,
+         alert_message = msg("exit_short", math.abs(strategy.position_size), ep + tradeStop, na))
+
+// Opposite-signal exit (matters for one-directional modes)
+if exitOnOpp and strategy.position_size > 0 and shortRaw
+    strategy.close("L", comment = "opp signal", alert_message = msg("exit_long", math.abs(strategy.position_size), na, na))
+if exitOnOpp and strategy.position_size < 0 and longRaw
+    strategy.close("S", comment = "opp signal", alert_message = msg("exit_short", math.abs(strategy.position_size), na, na))
+
+// Time stop
+if maxBars > 0 and strategy.opentrades > 0
+    if bar_index - strategy.opentrades.entry_bar_index(0) >= maxBars
+        strategy.close_all(comment = "time stop", alert_message = msg("flat", 0, na, na))
+
+// Flatten when leaving the test window (and always before the vault lock) so nothing leaks
+if not inWindow and strategy.position_size != 0
+    strategy.close_all(comment = time >= devEnd ? "vault lock" : "window end")
+
+// ───────────────────────────── 7. VISUALS & RUN CARD ───────────────────────
+bgcolor(inWindow ? color.new(color.blue, 94) : na, title = "Test window")
+bgcolor(time >= devEnd and time < vaultStart ? color.new(color.orange, 88) : na, title = "Embargo")
+bgcolor(time >= vaultStart ? color.new(color.red, 88) : na, title = "Vault (off-limits)")
+plot(sigMode == "Donchian breakout" ? upper : na, "Donchian upper", color.teal)
+plot(sigMode == "Donchian breakout" ? lower : na, "Donchian lower", color.maroon)
+plot(sigMode == "EMA cross" ? emaF : na, "EMA fast", color.orange)
+plot(sigMode == "EMA cross" ? emaS : na, "EMA slow", color.purple)
+plot(sigMode == "RSI pullback" ? trendS : na, "Trend SMA", color.gray)
+
+// Run card: screenshot or copy this into your experiment log for every run
+string params = sigMode + " | don=" + str.tostring(donLen) + " ema=" + str.tostring(fastLen) + "/" + str.tostring(slowLen) +
+     " rsi=" + str.tostring(rsiLen) + "(" + str.tostring(rsiLo) + "/" + str.tostring(rsiHi) + ")" +
+     " | htf=" + (useHtf ? htfTf + "/" + str.tostring(htfLen) : "off") +
+     " | stop=" + str.tostring(stopMult) + "ATR tp=" + (useTp ? str.tostring(tpR) + "R" : "off") + " | " + direction
+
+var table card = table.new(position.top_right, 2, 9, bgcolor = color.new(color.black, 15), border_width = 1)
+if barstate.islast
+    float pf = strategy.grossloss > 0 ? strategy.grossprofit / strategy.grossloss : na
+    float wr = strategy.closedtrades > 0 ? 100.0 * strategy.wintrades / strategy.closedtrades : na
+    string wtxt = windowMode + (str.startswith(windowMode, "WF") ? " k=" + str.tostring(foldK) + "/" + str.tostring(nFolds) : "")
+    table.cell(card, 0, 0, "Window",        text_color = color.silver, text_size = size.small)
+    table.cell(card, 1, 0, wtxt,            text_color = color.white,  text_size = size.small)
+    table.cell(card, 0, 1, "Trades",        text_color = color.silver, text_size = size.small)
+    table.cell(card, 1, 1, str.tostring(strategy.closedtrades), text_color = color.white, text_size = size.small)
+    table.cell(card, 0, 2, "Net %",         text_color = color.silver, text_size = size.small)
+    table.cell(card, 1, 2, str.tostring(strategy.netprofit_percent, "#.##"), text_color = color.white, text_size = size.small)
+    table.cell(card, 0, 3, "Max DD %",      text_color = color.silver, text_size = size.small)
+    table.cell(card, 1, 3, str.tostring(strategy.max_drawdown_percent, "#.##"), text_color = color.white, text_size = size.small)
+    table.cell(card, 0, 4, "Profit factor", text_color = color.silver, text_size = size.small)
+    table.cell(card, 1, 4, str.tostring(pf, "#.##"), text_color = color.white, text_size = size.small)
+    table.cell(card, 0, 5, "Win rate %",    text_color = color.silver, text_size = size.small)
+    table.cell(card, 1, 5, str.tostring(wr, "#.#"), text_color = color.white, text_size = size.small)
+    table.cell(card, 0, 6, "Params",        text_color = color.silver, text_size = size.small)
+    table.cell(card, 1, 6, params,          text_color = color.white,  text_size = size.tiny)
+    table.cell(card, 0, 7, "Vault lock",    text_color = color.silver, text_size = size.small)
+    table.cell(card, 1, 7, "dev end " + str.format_time(devEnd, "yyyy-MM-dd", "UTC") + " · vault " + str.format_time(vaultStart, "yyyy-MM-dd", "UTC"), text_color = color.white, text_size = size.tiny)
+    table.cell(card, 0, 8, "Warning",       text_color = color.silver, text_size = size.small)
+    table.cell(card, 1, 8, strategy.closedtrades < 30 ? "< 30 trades: not significant" : "ok", text_color = strategy.closedtrades < 30 ? color.orange : color.lime, text_size = size.small)

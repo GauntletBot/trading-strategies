@@ -94,6 +94,7 @@ trading-strategies/
 │   └── STORY_TEMPLATE.md           ← template for story files
 │
 ├── scripts/                        ← CI validation scripts
+├── tools/                          ← harness.pine, analyze_trades.py (latest; older in tools/archive/)
 │
 ├── dev/                            ← individual development sandboxes
 │   └── {username}/

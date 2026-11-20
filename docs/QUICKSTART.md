@@ -17,9 +17,11 @@ You need:
 
 - **TradingView**, any plan. Premium or higher adds Bar Magnifier (realistic fills inside a bar) and Deep Backtesting (full intraday history). Without them, pick a timeframe where enough bars load.
 - **Python 3.11+** with `pip install pandas numpy openpyxl tabulate`.
-- **The two tools:**
-  - `harness_v2.pine`: the Pine Script strategy harness, with a vault lock, test windows and risk-based sizing.
-  - `analyze_trades.py`: grades a TradingView trade list and logs every trial.
+- **The two tools**, from [`tools/`](../tools/) in this repo:
+  - [`harness.pine`](../tools/harness.pine): the Pine Script strategy harness, with a vault lock, test windows and risk-based sizing.
+  - [`analyze_trades.py`](../tools/analyze_trades.py): grades a TradingView trade list and logs every trial. Copy it into your work folder.
+
+  The plain file names are always the latest version; older ones are in `tools/archive/`.
 - **Your split dates:** development end and vault start for your symbol. Everything on or after development end is off-limits during Stages 0 and 1.
 
 **Write one sentence first.** Say why the edge should exist and who is on the other side of the trade. If you can't, any result you find is probably noise.
@@ -30,7 +32,7 @@ You need:
 
 ## Setup (once per idea, about 10 minutes)
 
-1. **Load the harness.** Pine Editor → paste `harness_v2.pine` → Add to chart. Open the chart on the symbol and timeframe from your hypothesis.
+1. **Load the harness.** Pine Editor → paste `tools/harness.pine` → Add to chart. Open the chart on the symbol and timeframe from your hypothesis.
 2. **Set real costs.** In `strategy()`, set `commission_value` and `slippage` to your broker's real numbers. Then open the Strategy Tester's **Properties** and check nothing overrides them. Optimistic costs are the most common way a backtest lies.
 3. **Lock the vault.** In the *Vault lock* inputs, enter your **Development end** and **Vault start**. The harness never trades on or after development end, and shades the embargo orange and the vault red.
 4. **Set the test windows.** In *Test window*, set **Data start** and **In-sample end / OOS start**, about 60–70% in-sample and 30–40% out-of-sample, both inside the development period.
