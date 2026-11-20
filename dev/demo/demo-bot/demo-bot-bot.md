@@ -125,3 +125,4 @@ mlflow_experiment: /backtests/demo/demo-bot
 | Date | Author | Change |
 |---|---|---|
 | 2026-11-20 | demo | Initial bot.md created — full demo instance |
+| 2026-11-20 | demo | Strategy 1.1.0: explicit calculation logic for all parameters; Python now applies stop, target, time window, EOD exit and daily limit. Status back to review pending re-run. |
