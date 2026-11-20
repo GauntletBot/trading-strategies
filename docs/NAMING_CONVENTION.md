@@ -13,6 +13,9 @@
 | Run file | `{bot-name}-run (YYYY-MM-DD-NNN).md` | `sma-crossover-run (2026-11-20-001).md` |
 | Story file | `{bot-name}-story-{story-name}.md` | `sma-crossover-story-baseline-2023.md` |
 
+**Required:** strategy, dataspec, bot — every bot folder must have all three.  
+**Optional, repeatable:** run, story — added as backtesting progresses; no limit on how many.
+
 ---
 
 ## Naming Rules
@@ -32,58 +35,82 @@
 - Must be the leaf node of the tree (no folders inside a bot folder)
 - Same naming rules as category folders
 - Should describe the strategy concisely: `sma-crossover`, `rsi-reversion`, `vwap-scalp`
-- The bot folder name becomes the **prefix** for all three files inside it
+- The bot folder name becomes the **prefix** for all five file types inside it
+
+---
+
+## File Rules
 
 ### Strategy File
 ```
 {bot-name}-strategy (YYYY-MM-DD).md
 ```
 - The date is the **last-updated date** of the strategy logic
-- Update the date in the filename whenever the signal logic or parameters change
+- Update the date in the filename whenever signal logic or parameters change
 - Cosmetic edits (typos, formatting) do not require a date bump
-- One strategy file per bot folder — do not keep old dated versions in the folder (git history preserves them)
+- **One per bot folder** — do not keep old dated versions alongside the current one; git history preserves them
 
 **Valid:** `sma-crossover-strategy (2026-11-20).md`  
-**Invalid:** `sma-crossover-strategy.md` (missing date)  
-**Invalid:** `sma-crossover-strategy (November 2026).md` (wrong date format)  
-**Invalid:** `SMA-Crossover-Strategy (2026-11-20).md` (not lowercase)
+**Invalid:** `sma-crossover-strategy.md` — missing date  
+**Invalid:** `sma-crossover-strategy (November 2026).md` — wrong date format  
+**Invalid:** `SMA-Crossover-Strategy (2026-11-20).md` — not lowercase  
+**Invalid:** two strategy files in the same folder — delete the old one
 
 ### DataSpec File
 ```
 {bot-name}-dataspec.yaml
 ```
-- No date in the filename — the spec is versioned via the `version:` field inside the file
+- No date in the filename — versioned via the `version:` field inside the file
 - Must use `.yaml` extension (not `.yml`)
+- **One per bot folder**
+
+**Valid:** `sma-crossover-dataspec.yaml`  
+**Invalid:** `sma-crossover-dataspec.yml` — wrong extension  
+**Invalid:** `dataspec.yaml` — missing bot-name prefix
 
 ### Bot File
 ```
 {bot-name}-bot.md
 ```
 - Bot Operations Document — runtime config, monitoring, incident log
-- No date in the filename — updated in-place, git history tracks changes
+- No date in the filename — updated in-place; git history tracks changes
+- **One per bot folder**
+
+**Valid:** `sma-crossover-bot.md`  
+**Invalid:** `sma-crossover-operations.md` — wrong suffix  
+**Invalid:** `bot.md` — missing bot-name prefix
 
 ### Run File
 ```
 {bot-name}-run (YYYY-MM-DD-NNN).md
 ```
-- Records one backtest execution: inputs, expected results (written before running), and actual results (filled after)
-- `NNN` is a zero-padded sequence number for multiple runs on the same day: `001`, `002`, etc.
-- **Write Expected Results before executing** — this is the TDD contract
-- Status field: `expected` → `completed` or `failed`
+- Records one backtest execution: inputs, expected results (written **before** running), and actual results (filled after)
+- `YYYY-MM-DD` is the date the run was created, not the date of the data
+- `NNN` is a zero-padded sequence for multiple runs on the same day: `001`, `002`, `003`
+- **Write Expected Results before executing** — this is the TDD contract; CI enforces it
+- Status lifecycle: `expected` → `completed` or `failed`
+- **Many per bot folder** — runs accumulate over time; never delete them
 
 **Valid:** `sma-crossover-run (2026-11-20-001).md`  
-**Invalid:** `sma-crossover-run-2026-11-20.md` (wrong format — parens and sequence required)
+**Valid:** `sma-crossover-run (2026-11-20-002).md` — second run on the same day  
+**Invalid:** `sma-crossover-run-2026-11-20.md` — wrong format, missing parens and sequence  
+**Invalid:** `sma-crossover-run (2026-11-20).md` — missing sequence number  
+**Invalid:** `sma-crossover-run (20261120-001).md` — date must be hyphenated YYYY-MM-DD
 
 ### Story File
 ```
 {bot-name}-story-{story-name}.md
 ```
 - A named hypothesis linking one or more run documents
-- Declares acceptance criteria before any run executes
-- Status: `open` → `passing` or `failing`
-- Story name is lowercase-hyphen: `baseline-2023`, `high-vol-regime`, `param-sweep-fast-window`
+- Declares a falsifiable claim and acceptance criteria **before** any run executes
+- `{story-name}` is lowercase-hyphen: `baseline-2023`, `high-vol-regime`, `param-sweep-fast-window`
+- Status lifecycle: `open` → `passing` or `failing`
+- **Many per bot folder** — a bot may have multiple active and historical stories
 
-**Valid:** `sma-crossover-story-baseline-2023.md`
+**Valid:** `sma-crossover-story-baseline-2023.md`  
+**Valid:** `sma-crossover-story-high-vol-regime.md`  
+**Invalid:** `sma-crossover-story.md` — missing story name  
+**Invalid:** `sma-crossover-story-Baseline_2023.md` — not lowercase, uses underscore
 
 ---
 
@@ -91,22 +118,46 @@
 
 | Bad | Why | Good |
 |---|---|---|
-| `SMA_Crossover/` | Uppercase + underscores | `sma-crossover/` |
+| `SMA_Crossover/` | Uppercase + underscores in folder name | `sma-crossover/` |
 | `my-strategy.md` | Missing bot-name prefix and date | `sma-crossover-strategy (2026-11-20).md` |
 | `dataspec.yml` | Wrong extension, missing prefix | `sma-crossover-dataspec.yaml` |
 | `bot-folder/sub-bot/` | Bot folders are leaf nodes | Move sub-bot to its own category folder |
-| `dev/Jane/` | Wrong — must match GitHub username exactly | `dev/trader-jane/` |
+| `dev/Jane/` | Must match GitHub username exactly | `dev/trader-jane/` |
 | Two strategy files in one bot folder | Causes ambiguity | Delete the old one; git preserves history |
+| `sma-crossover-run-2026-11-20.md` | Run file missing parens and sequence | `sma-crossover-run (2026-11-20-001).md` |
+| `sma-crossover-run (2026-11-20).md` | Run file missing sequence number | `sma-crossover-run (2026-11-20-001).md` |
+| `sma-crossover-story.md` | Story file missing story name | `sma-crossover-story-baseline-2023.md` |
+| Deleting old run files | Runs are the evidence record | Keep all runs; mark status `failed` if needed |
 
 ---
 
-## Updating a Strategy
+## Updating Each File Type
 
-When you change signal logic or parameters:
-
+### Updating a Strategy
+When signal logic or parameters change:
 1. Edit `{bot-name}-strategy (OLD-DATE).md`
-2. Rename the file to `{bot-name}-strategy (NEW-DATE).md`
+2. Rename to `{bot-name}-strategy (NEW-DATE).md`
 3. Update the `updated:` field in the metadata block inside the file
-4. Commit both changes in one commit
+4. Commit both changes in one commit — the rename appears clearly in the PR diff
 
-The rename shows up clearly in the PR diff and git log.
+### Updating a DataSpec
+When symbols, date range, or frequency change:
+1. Edit the YAML file in-place
+2. Bump the `version:` field inside the file (semver)
+3. Any existing run files referencing the old spec remain valid — they captured their inputs at run time
+
+### Updating a Bot File
+Update in-place at any time — no rename needed. Add an entry to the Change Log section for significant changes.
+
+### Adding a New Run
+1. Copy `docs/RUN_TEMPLATE.md` → `{bot-name}-run (YYYY-MM-DD-NNN).md` in the bot folder
+2. Fill in the Inputs and Parameters Used sections
+3. **Fill in Expected Results** with numeric targets before committing
+4. Commit and open a PR — CI validates that expected values are set
+5. Execute the backtest, then fill Actual Results and set `status: completed`
+
+### Adding a New Story
+1. Copy `docs/STORY_TEMPLATE.md` → `{bot-name}-story-{name}.md` in the bot folder
+2. Write the hypothesis and acceptance criteria **before** creating any run files for it
+3. Add run file references to the Runs table as you execute
+4. Update `status:` to `passing` or `failing` once runs are complete
