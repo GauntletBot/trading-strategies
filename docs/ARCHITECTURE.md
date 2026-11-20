@@ -1,5 +1,16 @@
 # Information Architecture
 
+## Docs
+
+| Document | Purpose |
+|---|---|
+| [ARCHITECTURE.md](ARCHITECTURE.md) | This file — folder hierarchy, file roles, TDD workflow, promotion path, CI checks |
+| [NAMING_CONVENTION.md](NAMING_CONVENTION.md) | Naming rules, valid/invalid examples, and update guidance for all 5 file types |
+| [RUN_TEMPLATE.md](RUN_TEMPLATE.md) | Copy-paste template for a new run file |
+| [STORY_TEMPLATE.md](STORY_TEMPLATE.md) | Copy-paste template for a new story file |
+
+---
+
 ## Design Principles
 
 1. **User-owned trees** — each user owns their subtree under `dev/{username}/`. No one else merges into it.
