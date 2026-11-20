@@ -1,5 +1,16 @@
 # Naming Convention
 
+## Docs
+
+| Document | Purpose |
+|---|---|
+| [ARCHITECTURE.md](ARCHITECTURE.md) | Folder hierarchy, file roles, TDD workflow, promotion path, CI checks |
+| [NAMING_CONVENTION.md](NAMING_CONVENTION.md) | This file — naming rules, valid/invalid examples, update guidance |
+| [RUN_TEMPLATE.md](RUN_TEMPLATE.md) | Copy-paste template for a new run file |
+| [STORY_TEMPLATE.md](STORY_TEMPLATE.md) | Copy-paste template for a new story file |
+
+---
+
 ## Rules at a Glance
 
 | Element | Convention | Example |
@@ -84,6 +95,8 @@
 ```
 {bot-name}-run (YYYY-MM-DD-NNN).md
 ```
+Template: [RUN_TEMPLATE.md](RUN_TEMPLATE.md)
+
 - Records one backtest execution: inputs, expected results (written **before** running), and actual results (filled after)
 - `YYYY-MM-DD` is the date the run was created, not the date of the data
 - `NNN` is a zero-padded sequence for multiple runs on the same day: `001`, `002`, `003`
@@ -101,6 +114,8 @@
 ```
 {bot-name}-story-{story-name}.md
 ```
+Template: [STORY_TEMPLATE.md](STORY_TEMPLATE.md)
+
 - A named hypothesis linking one or more run documents
 - Declares a falsifiable claim and acceptance criteria **before** any run executes
 - `{story-name}` is lowercase-hyphen: `baseline-2023`, `high-vol-regime`, `param-sweep-fast-window`
