@@ -1,3 +1,9 @@
+# Docs
+# ARCHITECTURE.md      — folder hierarchy, file roles, TDD workflow: /docs/ARCHITECTURE.md
+# NAMING_CONVENTION.md — naming rules for all 5 file types:          /docs/NAMING_CONVENTION.md
+# RUN_TEMPLATE.md      — copy-paste template for run files:           /docs/RUN_TEMPLATE.md
+# STORY_TEMPLATE.md    — copy-paste template for story files:         /docs/STORY_TEMPLATE.md
+
 spec_id:     sma-crossover-spy-1min-2023
 description: SPY 1-minute bars for 2023 — baseline dataset for SMA crossover development and backtesting
 version:     "1.0.0"
