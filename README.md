@@ -65,6 +65,7 @@ See the [Docs](#docs) section below for links to all reference documents.
 
 | Document | Purpose |
 |---|---|
+| [Intro for beginners](docs/intro/README.md) | Start here: overview, architecture and data flows, getting started step by step, glossary |
 | [ARCHITECTURE.md](docs/ARCHITECTURE.md) | Folder hierarchy, file roles, TDD workflow, promotion path, CI checks |
 | [NAMING_CONVENTION.md](docs/NAMING_CONVENTION.md) | Naming rules, valid/invalid examples, and update guidance for all 5 file types |
 | [RUN_TEMPLATE.md](docs/RUN_TEMPLATE.md) | Copy-paste template for a new run file |
