@@ -10,9 +10,7 @@ This repository is the source of truth for all trading bot strategies and histor
 4. Add run and story files as you backtest and iterate
 5. Open a PR — CI validates all files before merge
 
-See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the full information architecture.  
-See [docs/NAMING_CONVENTION.md](docs/NAMING_CONVENTION.md) for file and folder naming rules.  
-See [docs/RUN_TEMPLATE.md](docs/RUN_TEMPLATE.md) and [docs/STORY_TEMPLATE.md](docs/STORY_TEMPLATE.md) for TDD workflow templates.
+See the [Docs](#docs) section below for links to all reference documents.
 
 ---
 
@@ -63,16 +61,29 @@ See [docs/RUN_TEMPLATE.md](docs/RUN_TEMPLATE.md) and [docs/STORY_TEMPLATE.md](do
 
 ---
 
+## Docs
+
+| Document | Purpose |
+|---|---|
+| [ARCHITECTURE.md](docs/ARCHITECTURE.md) | Folder hierarchy, file roles, TDD workflow, promotion path, CI checks |
+| [NAMING_CONVENTION.md](docs/NAMING_CONVENTION.md) | Naming rules, valid/invalid examples, and update guidance for all 5 file types |
+| [RUN_TEMPLATE.md](docs/RUN_TEMPLATE.md) | Copy-paste template for a new run file |
+| [STORY_TEMPLATE.md](docs/STORY_TEMPLATE.md) | Copy-paste template for a new story file |
+
+---
+
 ## Repository Structure
 
 ```
 trading-strategies/
 ├── README.md
 ├── docs/
-│   ├── ARCHITECTURE.md
-│   ├── NAMING_CONVENTION.md
-│   ├── RUN_TEMPLATE.md
-│   └── STORY_TEMPLATE.md
+│   ├── ARCHITECTURE.md             ← folder hierarchy, file roles, TDD workflow
+│   ├── NAMING_CONVENTION.md        ← naming rules for all 5 file types
+│   ├── RUN_TEMPLATE.md             ← template for run files
+│   └── STORY_TEMPLATE.md           ← template for story files
+│
+├── scripts/                        ← CI validation scripts
 │
 ├── dev/                            ← individual development sandboxes
 │   └── {username}/
