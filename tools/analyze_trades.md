@@ -83,6 +83,30 @@ cd ~/gauntlet/my-bot
 analyze-trades is.csv --log experiments.csv --window IS --label "don=20 htf=D/50"
 ```
 
+**7. Optional: a short alias, `at`.** To type `at` instead of `analyze-trades`:
+
+```bash
+echo "alias at='analyze-trades'" >> ~/.zshrc
+source ~/.zshrc
+```
+
+Then:
+
+```bash
+at is.csv --log experiments.csv --window IS --label "don=20 htf=D/50"
+```
+
+If you skipped steps 4 and 5, point the alias at the script directly instead:
+
+```bash
+echo "alias at='\$HOME/.venvs/gauntlet/bin/python \$HOME/code/trading-strategies/tools/analyze_trades.py'" >> ~/.zshrc
+source ~/.zshrc
+```
+
+> **Note:** macOS already has a built-in command called `at`, for scheduling jobs. It's off by default and rarely used, and the alias only hides it in your own terminal. If you ever need the original, run `command at` or `/usr/bin/at`. If you'd rather avoid the clash entirely, pick another short name such as `atr`.
+
+To remove the alias, delete the `alias at=…` line from `~/.zshrc` and open a new terminal.
+
 **Updating:** `git -C ~/code/trading-strategies pull`. The command picks up the new version automatically.
 
 **Removing:** `rm ~/.local/bin/analyze-trades` and `rm -rf ~/.venvs/gauntlet`.
@@ -91,7 +115,7 @@ analyze-trades is.csv --log experiments.csv --window IS --label "don=20 htf=D/50
 
 | Message | Fix |
 |---|---|
-| `command not found: analyze-trades` | Open a new terminal window, or run `source ~/.zshrc` |
+| `command not found: analyze-trades` (or `at` does something else) | Open a new terminal window, or run `source ~/.zshrc` |
 | `permission denied` | Run `chmod +x ~/.local/bin/analyze-trades` |
 | `No such file or directory` pointing at `analyze_trades.py` | The repo path in the launcher is wrong; edit `~/.local/bin/analyze-trades` |
 | `ModuleNotFoundError: pandas` | Re-run step 3's `pip install` |
