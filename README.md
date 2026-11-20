@@ -30,7 +30,7 @@ See [docs/NAMING_CONVENTION.md](docs/NAMING_CONVENTION.md) for file and folder n
 |---|---|
 | `{bot-name}-strategy (YYYY-MM-DD).md` | Signal logic, parameters, risk rules, approval checklist |
 | `{bot-name}-dataspec.yaml` | Historical dataset definition — symbols, period, frequency, feed |
-| `{bot-name}-bod.md` | Bot Operations Document — runtime config, deployment notes, known issues |
+| `{bot-name}-bot.md` | Bot Operations Document — runtime config, deployment notes, known issues |
 
 ---
 
@@ -49,7 +49,7 @@ trading-strategies/
 │           └── {bot-name}/
 │               ├── {bot-name}-strategy (YYYY-MM-DD).md
 │               ├── {bot-name}-dataspec.yaml
-│               └── {bot-name}-bod.md
+│               └── {bot-name}-bot.md
 │
 ├── staging/                        ← shared team review
 │   └── {username}/

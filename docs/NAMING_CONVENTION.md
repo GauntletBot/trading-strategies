@@ -9,7 +9,7 @@
 | Bot folder | lowercase, hyphens, strategy name | `sma-crossover`, `rsi-reversion` |
 | Strategy file | `{bot-name}-strategy (YYYY-MM-DD).md` | `sma-crossover-strategy (2026-11-20).md` |
 | DataSpec file | `{bot-name}-dataspec.yaml` | `sma-crossover-dataspec.yaml` |
-| BOD file | `{bot-name}-bod.md` | `sma-crossover-bod.md` |
+| Bot file | `{bot-name}-bot.md` | `sma-crossover-bot.md` |
 
 ---
 
@@ -53,11 +53,11 @@
 - No date in the filename — the spec is versioned via the `version:` field inside the file
 - Must use `.yaml` extension (not `.yml`)
 
-### BOD File
+### Bot File
 ```
-{bot-name}-bod.md
+{bot-name}-bot.md
 ```
-- BOD = Bot Operations Document
+- Bot Operations Document — runtime config, monitoring, incident log
 - No date in the filename — updated in-place, git history tracks changes
 
 ---

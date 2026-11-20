@@ -97,4 +97,4 @@ This strategy has stricter execution requirements than trend-following strategie
 
 | Date | Author | Change |
 |---|---|---|
-| 2026-11-20 | quant-dev | Initial BOD created |
+| 2026-11-20 | quant-dev | Initial bot.md created |

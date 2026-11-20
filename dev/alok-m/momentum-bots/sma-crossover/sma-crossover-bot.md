@@ -90,4 +90,4 @@ mlflow_experiment: /backtests/alok-m/sma-crossover
 
 | Date | Author | Change |
 |---|---|---|
-| 2026-11-20 | alok-m | Initial BOD created |
+| 2026-11-20 | alok-m | Initial bot.md created |

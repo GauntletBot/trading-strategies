@@ -81,4 +81,4 @@ mlflow_experiment: /backtests/trader-jane/rsi-reversion
 
 | Date | Author | Change |
 |---|---|---|
-| 2026-11-20 | trader-jane | Initial BOD created |
+| 2026-11-20 | trader-jane | Initial bot.md created |
