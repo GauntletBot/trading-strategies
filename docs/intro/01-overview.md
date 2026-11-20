@@ -36,20 +36,20 @@ flowchart LR
   S0 --> S2
   S1 --> S2
   S2 -- frozen model --> S3
-  V -. opened once per model .-> S3
+  V -. one holdback set<br/>opened per test .-> S3
   S3 -- pass --> P
   S3 -- fail --> S4
   P --> S4
 ```
 
-Stage 4's decision feeds the next iteration: a revised model goes back to Stage 2, and a new idea starts again at Stage 0.
+Stage 4's decision feeds the next iteration: a revised model goes back to Stage 2, and a new idea starts again at Stage 0. If the vault holds more than one holdback set, a fine-tuned model is tested on the next unopened set. See [Multiple holdback sets](02-architecture.md#multiple-holdback-sets).
 
 | Stage | Question it answers | Where it runs |
 |---|---|---|
 | **0 — Quick backtest** | Does the idea, exactly as written and untuned, make any money after costs? | Python on Alpaca historical data |
 | **1 — Discover** | Is this idea worth building properly? | TradingView (Pine Script) |
 | **2 — Port and tune** | Does a version we fully control reproduce it, and which settings work across many periods? | Python / Databricks |
-| **3 — Vault test** | Does the frozen model still work on data no decision has seen? | Python, on the vault period |
+| **3 — Vault test** | Does the frozen model still work on data no decision has seen? | Python, on the next unopened holdback set |
 | **Paper trading** | Does it work on new data with realistic orders? | Alpaca paper account |
 | **4 — Evaluate** | Promote, keep paper trading, revise, or retire? | You decide, using one scorecard |
 
@@ -69,7 +69,7 @@ Stage 0's pass gate is still a proposal: enough trades and positive expectancy a
 
 | Item | Value |
 |---|---|
-| Vault (holdback) | Newest 20% of history, separated by an embargo gap |
+| Vault | Newest 20% of history: one holdback set by default, or several, each after its own embargo gap |
 | Maximum drawdown allowed by the gates | 25% |
 | Minimum trades for a result to count | 100 (fewer than 30 proves nothing) |
 | Paper trading period | 1–3 months |

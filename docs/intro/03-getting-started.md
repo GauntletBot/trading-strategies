@@ -118,7 +118,7 @@ fill_gaps:         false
 
 **Required by CI:** `spec_id`, `symbols`, `start`, `end`, `frequency`, `source`, `feed`. Dates must be `YYYY-MM-DD`, and the values must come from the lists in the comments.
 
-**Keep the vault in mind:** your development work should end at the vault boundary. Don't choose dates that reach into the newest 20% of history.
+**Keep the vault in mind:** your development work should end at the vault boundary. Don't choose dates that reach into the newest 20% of history. The holdback sets inside the vault are fixed before Stage 1 (see [Multiple holdback sets](02-architecture.md#multiple-holdback-sets)).
 
 ## Step 5 — Write the strategy (`{bot}-strategy (YYYY-MM-DD).md`)
 
@@ -236,8 +236,9 @@ CI fails if a `completed` run still contains `-ToDo`.
 | Move | How | Requires |
 |---|---|---|
 | `dev/` → `staging/` | PR that moves the bot folder | 1 approval, Databricks backtest passes, story `passing` |
-| Vault test (Stage 3) | Freeze the model, run it once on the vault period | Keeps ≥ 50% of development performance, inside the development 90% confidence interval, 95th-percentile Monte Carlo drawdown below 25% |
-| Paper trading | Set `execution_mode: paper` in `bot.md` | Vault passed; runs 1–3 months |
+| Vault test (Stage 3) | Freeze the model, run it once on the next unopened holdback set | Keeps ≥ 50% of development performance, inside the development 90% confidence interval, 95th-percentile Monte Carlo drawdown below 25% |
+| Fine-tune and retest (optional) | Fold the opened set into training, retune, freeze a new version, run it once on the next set | An unopened holdback set remains; the round counts toward the trial count |
+| Paper trading | Set `execution_mode: paper` in `bot.md` | A holdback set passed; runs 1–3 months |
 | `staging/` → `prod/` | PR | 2 approvals, CI passes, paper results attached, every story `passing` |
 
 Run and story files move with the bot. They are its evidence record.

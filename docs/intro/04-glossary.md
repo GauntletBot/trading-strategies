@@ -14,13 +14,15 @@ Terms are grouped by topic, then listed alphabetically within each group.
 
 | Term | Meaning |
 |---|---|
-| **Burned vault** | A vault period that can no longer give a clean test, because someone changed the model after seeing its vault result. Paper trading becomes the only clean test left for that idea. |
+| **Burned vault** | A vault with no unopened holdback set left, so it can no longer give a clean test. Paper trading becomes the only clean test left for that idea. |
 | **Candidate spec** | The output of Stage 1: the rules in plain language, parameter ranges, the hypothesis and the TradingView trade list. |
 | **Development period** | The older part of price history (about 80%). All exploration and tuning happens here. |
-| **Embargo gap** | A buffer of time between the development period and the vault, at least as long as the model's longest lookback. It stops information leaking across the boundary. |
-| **Frozen model** | A model that can no longer change: a specific code version plus its config, parameters and cost assumptions. Only a frozen model may be tested on the vault. |
+| **Embargo gap** | A buffer of time before each holdback set, at least as long as the model's longest lookback. It stops information leaking from training data into the set being tested. |
+| **Fine-tuning round** | Retraining a model after a holdback set has been opened, with that set added to the training data, then freezing a new version for the next set. Each round counts toward the trial count. |
+| **Frozen model** | A model that can no longer change: a specific code version plus its config, parameters and cost assumptions. Only a frozen model may be tested on a holdback set. |
 | **Gate** | A pass/fail check a strategy must clear before moving to the next stage. |
 | **Gauntlet** | The whole system: a series of stages every trading idea must pass before risking real money. |
+| **Holdback set** | One slice of the vault, such as H1 or H2. Sets are fixed before Stage 1, opened oldest first, and each tests one frozen model once. |
 | **Hypothesis** | One sentence saying why an edge should exist and who is on the other side of the trade. |
 | **Iteration** | One trip through the stages, ending in a Stage 4 decision. |
 | **Paper trading** | Trading with fake money on live market data, through Alpaca's paper account. Runs for 1–3 months. |
@@ -29,9 +31,9 @@ Terms are grouped by topic, then listed alphabetically within each group.
 | **Stage 0 — Quick backtest** | Runs the idea exactly as written, with no tuning, on Alpaca data in Python. Its gate (still a proposal) is enough trades and positive expectancy after costs. |
 | **Stage 1 — Discover** | Fast exploration in TradingView to find ideas worth building properly. |
 | **Stage 2 — Port and tune** | Rebuild the idea in Python, check it matches TradingView, then tune it with walk-forward testing. |
-| **Stage 3 — Vault test** | A single run of the frozen model on the vault. |
+| **Stage 3 — Vault test** | A single run of a frozen model on the next unopened holdback set. |
 | **Stage 4 — Evaluate** | Review the scorecard and decide what happens next. |
-| **Vault (holdback)** | The newest 20% of price history, locked before any exploration. Each frozen model is tested on it once. |
+| **Vault** | The newest 20% of price history, locked before any exploration. Either one holdback set or several, each opened once. |
 
 ## Repo and files
 

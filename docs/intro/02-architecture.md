@@ -59,35 +59,85 @@ Reading the diagram, step by step:
 6. **You copy the metrics into the run file** and mark each one pass or fail.
 7. **The story is updated:** it is `passing` only if every acceptance criterion is met.
 
-## Data flow 2 — the validation stages
+## Data flow 2 — the validation stages and the vault
 
-This shows how data is split so tuning never sees the vault.
+This shows how price history is split so tuning never sees the data it will be judged on.
 
 ```mermaid
 flowchart LR
   subgraph TIME[Price history, oldest to newest]
     DEV[Development period<br/>oldest ~80%]
-    GAP[Embargo gap]
-    VAULT[(Vault<br/>newest 20%)]
-    DEV ~~~ GAP ~~~ VAULT
+    G1[Gap]
+    H1[(Holdback set H1)]
+    G2[Gap]
+    H2[(Holdback set H2)]
+    DEV ~~~ G1 ~~~ H1 ~~~ G2 ~~~ H2
   end
   NEW[New live data<br/>after today]
 
-  DEV --> S0[Stage 0<br/>quick backtest]
-  DEV --> S1[Stage 1<br/>TradingView]
-  DEV --> S2[Stage 2<br/>walk-forward tuning]
-  S2 -- frozen model --> S3[Stage 3<br/>vault test]
-  VAULT -. unlocked once .-> S3
-  S3 -- pass --> PAPER[Paper trading]
+  DEV --> S012[Stages 0 · 1 · 2<br/>explore and tune]
+  S012 -- frozen model v1 --> T1[Stage 3<br/>test on H1]
+  H1 -. opened once .-> T1
+  T1 -- fine-tune with H1<br/>folded into training --> T2[Stage 3<br/>test on H2]
+  H2 -. opened once .-> T2
+  T1 -- pass --> PAPER[Paper trading]
+  T2 -- pass --> PAPER
   NEW --> PAPER
   PAPER --> S4[Stage 4<br/>scorecard and decision]
-  S3 -- fail --> S4
+  T2 -- fail on last set --> S4
 ```
 
 - **Development period:** everything you explore and tune on.
-- **Embargo gap:** a buffer at least as long as the model's longest lookback. It stops indicator values from leaking across the boundary.
-- **Vault:** opened once per frozen model. If you change the model after seeing the vault result, the vault is "burned" for that idea, and paper trading becomes the only clean test left.
+- **Vault:** the newest 20% of history, locked before any exploration. It can be **one holdback set** (the default) or be split into **several holdback sets**, H1, H2, H3 and so on, in time order.
+- **Embargo gap:** a buffer at least as long as the model's longest lookback. There is one before **every** holdback set, so indicator values can't leak from training data into the set being tested.
 - **Paper trading:** uses data that didn't exist when the model was frozen.
+
+### Multiple holdback sets
+
+With one holdback set, you get one honest test. If you change the model after seeing that result, the vault is "burned" and paper trading is the only clean test left.
+
+Several holdback sets let you **fine-tune and test again** without fooling yourself:
+
+1. **Tune** on the development period, then freeze model **v1**.
+2. **Test v1 once on H1.**
+3. **Fine-tune.** H1 has now been seen, so it may join the training data. Retune on development + H1, then freeze model **v2**.
+4. **Test v2 once on H2.** H2 is newer than everything v2 was trained on, and the gap before it stops leakage.
+5. **Repeat** until the sets run out. The last set opened gives the result you report.
+
+#### Rules
+
+| Rule | Why |
+|---|---|
+| The sets, their sizes and the gaps are fixed **before Stage 1**, and frozen with the other split dates | Choosing them after seeing results would let the results shape the test |
+| Sets are opened **in time order, oldest first**; none can be skipped | Training data must always be older than the set it's tested on |
+| Each set is opened **once**, by one frozen model, and every opening is logged | A set used twice is no longer unseen |
+| A model may **train on** a set that has been opened, never **test on** one | An opened set is ordinary training data from then on |
+| Every fine-tuning round counts toward the **trial count** | More attempts raise the bar for the Deflated Sharpe gate |
+| A model that passes any set may go to paper trading; one that fails the **last** set goes to Stage 4 | Paper trading stays the final clean test |
+
+#### Choosing sizes
+
+- **Default:** one set covering the whole 20%. This is how Gauntlet worked before.
+- **Splitting** buys extra test rounds but makes each set smaller. A smaller set holds fewer trades, so its result is less certain.
+- **Make each set long enough for at least 30 trades** at the strategy's normal trading rate. Aim for 100. A set below 30 can't pass or fail anything meaningfully.
+- Put the **largest set first** if you expect to fine-tune once, so the most important test has the most data. Later sets can be smaller.
+
+#### Example split configuration
+
+```yaml
+# splits.yaml — frozen with `gauntlet splits freeze` before Stage 1
+development_fraction: 0.80        # oldest 80% of history
+embargo: longest_lookback         # a gap before every holdback set
+holdback_sets:                    # newest 20%, in time order
+  - id: H1
+    fraction: 0.10                # first test, the largest
+  - id: H2
+    fraction: 0.05                # after one round of fine-tuning
+  - id: H3
+    fraction: 0.05                # after a second round
+```
+
+The `Splitter` works out each set's dates from these fractions, places the gaps, and refuses to return a set's data unless a frozen model ID is given and every older set has been opened.
 
 ## Data flow 3 — Stage 1 in TradingView
 
@@ -121,7 +171,7 @@ The Python core is built from small parts with fixed jobs. Any part can be repla
 | Part | Job | First version |
 |---|---|---|
 | `DataProvider` | Returns standard price bars for a symbol, bar size and date range | Alpaca, CSV import |
-| `Splitter` | Sets development, embargo and vault dates and walk-forward folds; refuses vault data without a frozen model ID | Time-based splits |
+| `Splitter` | Sets development dates, holdback sets, embargo gaps and walk-forward folds; opens holdback sets oldest first, once each, only for a frozen model | Time-based splits |
 | `Model` | Learns from past bars and outputs a target position from −1 (short) to +1 (long) | `RuleModel`: rules plus a parameter search |
 | `Sizer` | Turns a target position into a number of shares | Risk-based sizing with caps |
 | `Broker` | Executes orders and reports fills | `SimBroker` for backtests, `AlpacaPaperBroker` for paper trading |
