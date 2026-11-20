@@ -1,0 +1,57 @@
+name: Validate Bot Files
+
+on:
+  pull_request:
+    branches: [main, staging, prod]
+  push:
+    branches: [main, staging, prod]
+
+jobs:
+  validate:
+    name: Validate Strategy, DataSpec & Bot Files
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0          # full history so we can diff against base branch
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r scripts/requirements.txt
+
+      - name: Detect changed bot folders
+        id: changed
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            BASE=${{ github.event.pull_request.base.sha }}
+          else
+            BASE=${{ github.event.before }}
+          fi
+          # Collect unique bot folders that have changed files
+          git diff --name-only "$BASE" HEAD \
+            | grep -E '^(dev|staging|prod)/' \
+            | python3 -c "
+          import sys, os, json
+          folders = set()
+          for line in sys.stdin:
+              parts = line.strip().split('/')
+              # bot folder is always depth 4+: env/user/category.../bot-name/
+              if len(parts) >= 4:
+                  # walk up until we find the bot folder (leaf containing the 3 files)
+                  folders.add('/'.join(parts[:-1]))
+          print(json.dumps(sorted(folders)))
+          " > /tmp/changed_folders.json
+          echo "Changed bot folders:"
+          cat /tmp/changed_folders.json
+
+      - name: Validate all changed bot folders
+        run: PYTHONPATH=scripts python3 scripts/validate_all.py /tmp/changed_folders.json
+
+      - name: Validate naming conventions
+        run: PYTHONPATH=scripts python3 scripts/validate_naming.py
