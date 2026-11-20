@@ -60,26 +60,26 @@ If more than one exit fires on the same bar, the first one in this list wins.
 
 ## Parameters
 
-| Parameter | Type | Default | Sweep Range | Constraint | Description | Formula |
-|---|---|---|---|---|---|---|
-| `fast_window` | int | 10 | 5, 10, 20 | ≥ 2, < `slow_window` | Fast SMA lookback in bars | I1 |
-| `slow_window` | int | 30 | 20, 30, 50 | > `fast_window` | Slow SMA lookback in bars | I1 |
-| `stop_loss` | float | 0.005 | 0.003, 0.005, 0.008 | 0 < x < 1 | Stop distance below the entry fill price, as a fraction | X1 |
-| `take_profit` | float | 0.010 | 0.008, 0.010, 0.015 | x > 0 | Target distance above the entry fill price, as a fraction | X2 |
-| `volume_lookback` | int | 20 | 10, 20 | ≥ 1 | Lookback bars for the volume filter average | I2 |
+| Parameter | Type | Units | Default | Sweep Range | Constraint | Description | Formula |
+|---|---|---|---|---|---|---|---|
+| `fast_window` | int | bars (1-min) | 10 | 5, 10, 20 | ≥ 2, < `slow_window` | Fast SMA lookback in bars | I1 |
+| `slow_window` | int | bars (1-min) | 30 | 20, 30, 50 | > `fast_window` | Slow SMA lookback in bars | I1 |
+| `stop_loss` | float | fraction of entry fill price (0.005 = 0.5%) | 0.005 | 0.003, 0.005, 0.008 | 0 < x < 1 | Stop distance below the entry fill price, as a fraction | X1 |
+| `take_profit` | float | fraction of entry fill price (0.010 = 1.0%) | 0.010 | 0.008, 0.010, 0.015 | x > 0 | Target distance above the entry fill price, as a fraction | X2 |
+| `volume_lookback` | int | bars (1-min) | 20 | 10, 20 | ≥ 1 | Lookback bars for the volume filter average | I2 |
 
 **Sweep rule:** skip any combination where `fast_window >= slow_window` (for example fast 20 / slow 20). Those pairs can never cross.
 
 **Fixed constants.** These are not swept. Changing one counts as a strategy change.
 
-| Constant | Value | Used in |
-|---|---|---|
-| `position_pct` | 0.10 | R1 |
-| `daily_loss_limit` | 0.02 | R2 |
-| `open_buffer_min` | 15 | E3 |
-| `close_buffer_min` | 15 | E3 |
-| `fee_rate` | 0.0005 per side (0.1% round trip) | C1 |
-| `slippage_rate` | 0.0005 per side (0.1% round trip) | C1 |
+| Constant | Value | Units | Used in |
+|---|---|---|---|
+| `position_pct` | 0.10 | fraction of current equity | R1 |
+| `daily_loss_limit` | 0.02 | fraction of prior-session closing equity | R2 |
+| `open_buffer_min` | 15 | minutes | E3 |
+| `close_buffer_min` | 15 | minutes | E3 |
+| `fee_rate` | 0.0005 per side (0.1% round trip) | fraction of fill notional (USD), per side | C1 |
+| `slippage_rate` | 0.0005 per side (0.1% round trip) | fraction of reference price, per side | C1 |
 
 ---
 
@@ -91,6 +91,32 @@ If more than one exit fires on the same bar, the first one in this list wins.
 - `O(t)`, `H(t)`, `L(t)`, `C(t)`, `V(t)` are the open, high, low, close and volume of bar `t`.
 - `t-1` is the previous bar in the series. Overnight is not a break: the 09:30 bar's previous bar is the prior session's 15:59 bar.
 - A value is **undefined** until its full lookback window exists. A rule that needs an undefined value is false.
+
+### Calculated Values
+
+Every value computed by the formulas below, with its units.
+
+| Value | Formula | Units |
+|---|---|---|
+| `O(t)`, `H(t)`, `L(t)`, `C(t)` | input | USD per share |
+| `V(t)` | input | shares traded in the bar |
+| `SMA_fast(t)`, `SMA_slow(t)` | I1 | USD per share |
+| `AvgVol(t)` | I2 | shares per bar |
+| `cross_up(t)`, `cross_down(t)` | E1, X3 | boolean |
+| `vol_ok(t)` | E2 | boolean |
+| `time_ok(t)` | E3 | boolean |
+| `session_open`, `session_close` | E3 | timestamp (America/New_York) |
+| `enter(t)` | E4 | boolean |
+| `entry_price` | E4 | USD per share (includes slippage) |
+| `stop_level` | X1 | USD per share |
+| `target_level` | X2 | USD per share |
+| exit fill price | X1–X4, C1 | USD per share (includes slippage) |
+| `fee` | C1 | USD |
+| `shares` | R1 | shares (whole number) |
+| `equity(t)` | R1 | USD |
+| `day_start_equity` | R2 | USD |
+| `day_pnl(t)` | R2 | USD |
+| `halted(day)` | R2 | boolean |
 
 ### Indicators
 
