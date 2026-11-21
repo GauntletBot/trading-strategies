@@ -76,6 +76,7 @@ New here? Start with the **[Gauntlet — Introduction for Beginners slide deck](
 | [Intro for beginners](docs/intro/README.md) | Start here: overview, architecture and data flows, getting started step by step, glossary |
 | [ARCHITECTURE.md](docs/ARCHITECTURE.md) | Folder hierarchy, file roles, TDD workflow, promotion path, CI checks |
 | [NAMING_CONVENTION.md](docs/NAMING_CONVENTION.md) | Naming rules, valid/invalid examples, and update guidance for all 5 file types |
+| [STRATEGY_GUIDE.md](docs/STRATEGY_GUIDE.md) | Every section of a strategy file, how each parameter is calculated, the Search Space section and its genetic-algorithm encoding |
 | [RUN_TEMPLATE.md](docs/RUN_TEMPLATE.md) | Copy-paste template for a new run file |
 | [STORY_TEMPLATE.md](docs/STORY_TEMPLATE.md) | Copy-paste template for a new story file |
 
@@ -90,6 +91,7 @@ trading-strategies/
 │   ├── QUICKSTART.md               ← idea to candidate in TradingView
 │   ├── ARCHITECTURE.md             ← folder hierarchy, file roles, TDD workflow
 │   ├── NAMING_CONVENTION.md        ← naming rules for all 5 file types
+│   ├── STRATEGY_GUIDE.md           ← strategy file reference, Search Space, GA encoding
 │   ├── RUN_TEMPLATE.md             ← template for run files
 │   └── STORY_TEMPLATE.md           ← template for story files
 │

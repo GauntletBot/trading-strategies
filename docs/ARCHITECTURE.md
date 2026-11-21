@@ -6,6 +6,7 @@
 |---|---|
 | [ARCHITECTURE.md](ARCHITECTURE.md) | This file — folder hierarchy, file roles, TDD workflow, promotion path, CI checks |
 | [NAMING_CONVENTION.md](NAMING_CONVENTION.md) | Naming rules, valid/invalid examples, and update guidance for all 5 file types |
+| [STRATEGY_GUIDE.md](STRATEGY_GUIDE.md) | Every section of a strategy file, how each parameter is calculated, the Search Space section and its genetic-algorithm encoding |
 | [RUN_TEMPLATE.md](RUN_TEMPLATE.md) | Copy-paste template for a new run file |
 | [STORY_TEMPLATE.md](STORY_TEMPLATE.md) | Copy-paste template for a new story file |
 
@@ -91,7 +92,7 @@ dev/
 ### `{bot-name}-strategy (YYYY-MM-DD).md` — Required
 
 The **specification** for the trading strategy. Human-readable, PR-reviewable.  
-Contains: signal logic in plain English, parameters with types and sweep ranges, risk rules, entry/exit conditions, Python class reference, backtest results table, and an approval checklist.  
+Contains: signal logic in plain English, parameters with types, units and sweep ranges, calculation logic (the exact formula for every rule), risk rules, entry/exit conditions, an optional Search Space for genetic-algorithm tuning, Python class reference, backtest results table, and an approval checklist. Full reference: [STRATEGY_GUIDE.md](STRATEGY_GUIDE.md).  
 The date in the filename is updated on every logic change — rename the file and update the `updated:` field inside together in one commit.
 
 ### `{bot-name}-dataspec.yaml` — Required

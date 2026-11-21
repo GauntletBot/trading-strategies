@@ -6,7 +6,7 @@
 
 Terms are grouped by topic, then listed alphabetically within each group.
 
-**Jump to:** [Gauntlet process](#gauntlet-process) · [Repo and files](#repo-and-files) · [Trading basics](#trading-basics) · [Strategy mechanics](#strategy-mechanics) · [Metrics](#metrics) · [Validation and statistics](#validation-and-statistics) · [Tools and platforms](#tools-and-platforms)
+**Jump to:** [Gauntlet process](#gauntlet-process) · [Repo and files](#repo-and-files) · [Trading basics](#trading-basics) · [Strategy mechanics](#strategy-mechanics) · [Metrics](#metrics) · [Validation and statistics](#validation-and-statistics) · [Genetic algorithm tuning](#genetic-algorithm-tuning) · [Tools and platforms](#tools-and-platforms)
 
 ---
 
@@ -129,6 +129,31 @@ Terms are grouped by topic, then listed alphabetically within each group.
 | **Trial count** | How many variants were tried for an idea, across every stage. It raises the bar for the Deflated Sharpe gate. |
 | **Walk-forward testing** | Tune on one window, test on the next, slide forward and repeat. Then judge the combined test windows. |
 | **Walk-forward efficiency** | Test-period performance divided by tuning-period performance. Gauntlet requires at least 0.5. |
+
+## Genetic algorithm tuning
+
+Full reference: [Strategy File Guide — Search Space and GA encoding](../STRATEGY_GUIDE.md#8-search-space).
+
+| Term | Meaning |
+|---|---|
+| **Block** | A group of related genes (signal, filter, risk, session). Crossover copies a whole block from one parent so settings that work together stay together. |
+| **Canonicalization** | Resetting inactive genes to their defaults and rounding values before hashing, so genomes that trade identically are treated as one strategy. |
+| **Conditional gene** | A gene that only matters when another gene is set, such as a volume lookback that applies only when the volume filter is on (`active_if`). |
+| **Crossover (GA)** | Making a child genome by mixing two parents' genes. |
+| **Derived parameter** | A parameter calculated from genes rather than searched directly, such as `slow_window = fast_window × slow_ratio`. Keeps relationships like fast < slow always true. |
+| **Free gene** | A gene that is active and allowed to change. A strategy may have at most 4 (`max_free_genes`). |
+| **GA (genetic algorithm)** | A search method that evolves a population of parameter sets by selection, crossover and mutation, keeping the best each generation. |
+| **Gene** | One searchable parameter in the Search Space. |
+| **Genome** | One complete set of gene values: the numbers the GA evolves, stored as values between 0 and 1. |
+| **Genome ID** | The first 12 characters of a hash of the decoded parameters. Same ID means same strategy, backtested once and counted as one trial. |
+| **Grid** | The finite list of values a gene may take, set by `step` (linear) or `points` (log). |
+| **Locked** | Parts of a strategy the GA may never change: hypothesis, logic, filters, costs, risk limits. |
+| **Log scale** | Grid spacing where each step multiplies the value by the same factor. Used for lookbacks, where 10 → 20 matters more than 110 → 120. |
+| **Mutation** | A small random change to one gene of a genome. |
+| **Neighbour** | A genome one grid point away on one gene. MetaGauntlet scores each genome together with its neighbours to favour plateaus. |
+| **NSGA-II** | A genetic algorithm for several goals at once. It keeps the set of best trade-offs (the Pareto front) instead of one winner. |
+| **Pareto front** | The set of variants where no goal can be improved without making another worse. |
+| **Search Space** | The optional strategy-file section listing which parameters the GA may change and over which grid. |
 
 ## Tools and platforms
 

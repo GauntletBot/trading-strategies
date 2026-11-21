@@ -6,6 +6,7 @@
 |---|---|
 | [ARCHITECTURE.md](ARCHITECTURE.md) | Folder hierarchy, file roles, TDD workflow, promotion path, CI checks |
 | [NAMING_CONVENTION.md](NAMING_CONVENTION.md) | This file — naming rules, valid/invalid examples, update guidance |
+| [STRATEGY_GUIDE.md](STRATEGY_GUIDE.md) | Every section of a strategy file, how each parameter is calculated, the Search Space section and its genetic-algorithm encoding |
 | [RUN_TEMPLATE.md](RUN_TEMPLATE.md) | Copy-paste template for a new run file |
 | [STORY_TEMPLATE.md](STORY_TEMPLATE.md) | Copy-paste template for a new story file |
 

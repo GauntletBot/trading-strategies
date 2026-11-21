@@ -124,7 +124,7 @@ fill_gaps:         false
 
 ## Step 5 — Write the strategy (`{bot}-strategy (YYYY-MM-DD).md`)
 
-Copy [`demo-bot-strategy (2026-11-20).md`](<../../dev/demo/demo-bot/demo-bot-strategy (2026-11-20).md>) and rename it with **today's date**. It must contain these sections:
+Copy [`demo-bot-strategy (2026-11-20).md`](<../../dev/demo/demo-bot/demo-bot-strategy (2026-11-20).md>) and rename it with **today's date**. The [Strategy File Guide](../STRATEGY_GUIDE.md) explains every section in detail, works through how each demo parameter is calculated, and specifies the Search Space and its genetic-algorithm encoding. It must contain these sections:
 
 | Section | What to write |
 |---|---|
@@ -134,12 +134,15 @@ Copy [`demo-bot-strategy (2026-11-20).md`](<../../dev/demo/demo-bot/demo-bot-str
 | **Parameters** | A table: every tunable value with type, **units**, default, sweep range, constraint and the formula ID that defines it |
 | **Calculation Logic** | The exact formula for every indicator, entry, exit, fill price, cost, position size and risk limit |
 | **Risk Rules** | Position size, stops, targets, daily loss limit, overnight policy |
+| **Search Space** (optional) | Only if the genetic algorithm will tune the strategy: which parameters it may change, on which grid, with derived and locked parts. See [Search Space](../STRATEGY_GUIDE.md#8-search-space) |
 | **Python Implementation** | The strategy class. It must do exactly what Calculation Logic says |
 | **Approval Checklist** | At least one checklist item |
 
 **Be exact in Calculation Logic.** "Take profit 1%" isn't enough. Say 1% of *which* price, checked against *which* bar price, filled at *what* price, and what happens if the stop and the target are both hit in the same bar. The demo's [Calculation Logic section](<../../dev/demo/demo-bot/demo-bot-strategy (2026-11-20).md#calculation-logic>) shows the expected level of detail.
 
-**When you change the logic**, update `version` and `updated`, and rename the file to the new date in the same commit. Git history keeps the old versions.
+**Write every parameter row completely:** type, units (bars of which frequency, fraction of which price), default, sweep range, constraint and formula ID. [How each parameter is calculated](../STRATEGY_GUIDE.md#5-how-each-parameter-is-calculated-demo-bot) shows the demo's parameters worked through with numbers.
+
+**When you change the logic**, update `version` and `updated`, and rename the file to the new date in the same commit. Git history keeps the old versions. Changing a default, a fixed constant or the Search Space also counts as a change (see [Changing a strategy](../STRATEGY_GUIDE.md#11-changing-a-strategy)).
 
 ## Step 6 — Write the bot ops doc (`{bot}-bot.md`)
 

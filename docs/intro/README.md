@@ -11,4 +11,4 @@ New to the Gauntlet trading bot system? Start here and read the sections in orde
 
 **Worked example:** the [demo bot](../../dev/demo/demo-bot/) has all five file types filled in.
 
-**Reference docs:** [ARCHITECTURE.md](../ARCHITECTURE.md) · [NAMING_CONVENTION.md](../NAMING_CONVENTION.md) · [RUN_TEMPLATE.md](../RUN_TEMPLATE.md) · [STORY_TEMPLATE.md](../STORY_TEMPLATE.md)
+**Reference docs:** [ARCHITECTURE.md](../ARCHITECTURE.md) · [NAMING_CONVENTION.md](../NAMING_CONVENTION.md) · [STRATEGY_GUIDE.md](../STRATEGY_GUIDE.md) · [RUN_TEMPLATE.md](../RUN_TEMPLATE.md) · [STORY_TEMPLATE.md](../STORY_TEMPLATE.md)
